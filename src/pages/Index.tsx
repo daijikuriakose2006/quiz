@@ -8,13 +8,14 @@ import { QuizCreator } from "@/components/QuizCreator";
 import { QuizTaker } from "@/components/QuizTaker";
 import { QuizResults } from "@/components/QuizResults";
 import { QuizList } from "@/components/QuizList";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<'home' | 'create' | 'take' | 'results' | 'list'>('home');
   const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
   const { user, signOut } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -31,8 +32,7 @@ const Index = () => {
   };
 
   const handleViewResults = (quizId: string) => {
-    setSelectedQuizId(quizId);
-    setCurrentView('results');
+    navigate(`/results/${quizId}`);
   };
 
   if (currentView === 'create') {

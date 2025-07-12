@@ -8,6 +8,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import { QuizResults } from "@/components/QuizResults";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
                 <Index />
               </ProtectedRoute>
             } />
+            <Route path="/results/:quizId" element={<QuizResults />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

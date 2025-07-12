@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { QrCode, Play, BarChart3, Calendar, Users, Clock } from "lucide-react";
 import { QRCodeGenerator } from "@/components/QRCodeGenerator";
+import { useNavigate } from "react-router-dom";
 
 interface Quiz {
   id: string;
@@ -24,6 +25,7 @@ export const QuizList = ({ onTakeQuiz, onViewResults }: QuizListProps) => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [selectedQuizForQR, setSelectedQuizForQR] = useState<string | null>(null);
   const [resultsMap, setResultsMap] = useState<{ [quizId: string]: any[] }>({});
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchQuizzes = async () => {
@@ -59,6 +61,10 @@ export const QuizList = ({ onTakeQuiz, onViewResults }: QuizListProps) => {
 
   const getQuizResults = (quizId: string) => {
     return resultsMap[quizId] || [];
+  };
+
+  const handleViewResults = (quizId: string) => {
+    navigate(`/results/${quizId}`);
   };
 
   return (
