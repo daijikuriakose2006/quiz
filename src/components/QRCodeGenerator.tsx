@@ -4,82 +4,31 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { X, Download, Share } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import QRCode from "qrcode";
 
 interface QRCodeGeneratorProps {
   quizId: string;
   onClose: () => void;
 }
 
-export const QRCodeGenerator = ({ quizId, onClose }: QRCodeGeneratorProps) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+export function QRCodeGenerator({ quizId, onClose }: QRCodeGeneratorProps) {
   const { toast } = useToast();
-
-  // Simple QR code generation (in a real app, you'd use a proper QR code library)
-  const generateQRCode = (text: string, canvas: HTMLCanvasElement) => {
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const size = 200;
-    canvas.width = size;
-    canvas.height = size;
-
-    // Create a simple pattern (this is a placeholder - real QR codes are more complex)
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, size, size);
-    
-    ctx.fillStyle = '#000000';
-    
-    // Create a grid pattern as a simple QR code representation
-    const cellSize = size / 20;
-    for (let i = 0; i < 20; i++) {
-      for (let j = 0; j < 20; j++) {
-        // Create a pattern based on the text hash
-        const hash = Array.from(text).reduce((a, b) => {
-          a = ((a << 5) - a) + b.charCodeAt(0);
-          return a & a;
-        }, 0);
-        
-        if ((i + j + Math.abs(hash)) % 3 === 0) {
-          ctx.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
-        }
-      }
-    }
-
-    // Add positioning squares (corner markers)
-    const markerSize = cellSize * 3;
-    
-    // Top-left
-    ctx.fillRect(0, 0, markerSize, markerSize);
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(cellSize, cellSize, cellSize, cellSize);
-    
-    // Top-right
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(size - markerSize, 0, markerSize, markerSize);
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(size - markerSize + cellSize, cellSize, cellSize, cellSize);
-    
-    // Bottom-left
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(0, size - markerSize, markerSize, markerSize);
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(cellSize, size - markerSize + cellSize, cellSize, cellSize);
-  };
+  const quizUrl = `${window.location.origin}/?quiz=${quizId}`;
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     if (canvasRef.current) {
-      const quizUrl = `${window.location.origin}/?quiz=${quizId}`;
-      generateQRCode(quizUrl, canvasRef.current);
+      QRCode.toCanvas(canvasRef.current, quizUrl, { width: 200 });
     }
-  }, [quizId]);
+  }, [quizUrl]);
 
   const downloadQRCode = () => {
-    if (canvasRef.current) {
+    const canvas = canvasRef.current;
+    if (canvas) {
       const link = document.createElement('a');
       link.download = `quiz-${quizId}-qr-code.png`;
-      link.href = canvasRef.current.toDataURL();
+      link.href = canvas.toDataURL();
       link.click();
-      
       toast({
         title: "Success",
         description: "QR code downloaded successfully!",
@@ -97,8 +46,6 @@ export const QRCodeGenerator = ({ quizId, onClose }: QRCodeGeneratorProps) => {
     });
   };
 
-  const quizUrl = `${window.location.origin}/?quiz=${quizId}`;
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <Card className="max-w-md w-full">
@@ -112,11 +59,7 @@ export const QRCodeGenerator = ({ quizId, onClose }: QRCodeGeneratorProps) => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-center">
-            <canvas 
-              ref={canvasRef}
-              className="border border-gray-200 rounded-lg mx-auto"
-              style={{ maxWidth: '200px', height: 'auto' }}
-            />
+            <canvas ref={canvasRef} />
           </div>
           
           <div>
@@ -144,4 +87,4 @@ export const QRCodeGenerator = ({ quizId, onClose }: QRCodeGeneratorProps) => {
       </Card>
     </div>
   );
-};
+}
