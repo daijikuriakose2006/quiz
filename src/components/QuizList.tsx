@@ -147,27 +147,6 @@ export const QuizList = ({ onTakeQuiz, onViewResults }: QuizListProps) => {
                       QR Code
                     </Button>
                   </div>
-
-                  {results.length > 0 && (
-                    <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                      <h4 className="font-medium text-sm mb-2">Recent Participants:</h4>
-                      <div className="space-y-1">
-                        {results.slice(0, 3).map((result: any, index: number) => (
-                          <div key={index} className="flex justify-between text-xs">
-                            <span>{result.userName}</span>
-                            <span className="text-gray-600">
-                              {result.score}/{quiz.questions.length}
-                            </span>
-                          </div>
-                        ))}
-                        {results.length > 3 && (
-                          <p className="text-xs text-gray-500 mt-1">
-                            +{results.length - 3} more participants
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             );
