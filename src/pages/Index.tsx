@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlusCircle, QrCode, Trophy, Users, LogOut } from "lucide-react";
@@ -8,11 +8,22 @@ import { QuizCreator } from "@/components/QuizCreator";
 import { QuizTaker } from "@/components/QuizTaker";
 import { QuizResults } from "@/components/QuizResults";
 import { QuizList } from "@/components/QuizList";
+import { useLocation } from "react-router-dom";
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<'home' | 'create' | 'take' | 'results' | 'list'>('home');
   const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
   const { user, signOut } = useAuth();
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const quizId = params.get("quiz");
+    if (quizId) {
+      setSelectedQuizId(quizId);
+      setCurrentView("take");
+    }
+  }, [location.search]);
 
   const handleTakeQuiz = (quizId: string) => {
     setSelectedQuizId(quizId);
