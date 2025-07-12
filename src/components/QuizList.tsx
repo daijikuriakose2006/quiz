@@ -27,7 +27,16 @@ export const QuizList = ({ onTakeQuiz, onViewResults }: QuizListProps) => {
   useEffect(() => {
     const fetchQuizzes = async () => {
       const { data, error } = await supabase.from("quizzes").select("*");
-      if (data) setQuizzes(data);
+      if (data) {
+        // Map Supabase fields to your Quiz interface
+        setQuizzes(
+          data.map((quiz: any) => ({
+            ...quiz,
+            createdAt: quiz.created_at ? new Date(quiz.created_at) : new Date(),
+            questions: Array.isArray(quiz.questions) ? quiz.questions : [],
+          }))
+        );
+      }
       // Optionally handle error
     };
     fetchQuizzes();
