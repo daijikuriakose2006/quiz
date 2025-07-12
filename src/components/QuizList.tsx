@@ -23,29 +23,42 @@ interface QuizListProps {
 export const QuizList = ({ onTakeQuiz, onViewResults }: QuizListProps) => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [selectedQuizForQR, setSelectedQuizForQR] = useState<string | null>(null);
+  const [resultsMap, setResultsMap] = useState<{ [quizId: string]: any[] }>({});
 
   useEffect(() => {
     const fetchQuizzes = async () => {
-      const { data, error } = await supabase.from("quizzes").select("*");
+      const { data } = await supabase.from("quizzes").select("*");
       if (data) {
-        const mapped = data.map((quiz: any) => ({
-          ...quiz,
-          createdAt: quiz.created_at ? new Date(quiz.created_at) : new Date(),
-          questions: Array.isArray(quiz.questions) ? quiz.questions : [],
-        }));
-        console.log("Fetched quizzes from Supabase:", mapped); // <--- Add this line
-        setQuizzes(mapped);
-      }
-      if (error) {
-        console.error("Supabase fetch error:", error);
+        setQuizzes(
+          data.map((quiz: any) => ({
+            ...quiz,
+            createdAt: quiz.created_at ? new Date(quiz.created_at) : new Date(),
+            questions: Array.isArray(quiz.questions) ? quiz.questions : [],
+          }))
+        );
       }
     };
     fetchQuizzes();
   }, []);
 
+  useEffect(() => {
+    const fetchResults = async () => {
+      const { data } = await supabase.from("quiz_results").select("*");
+      if (data) {
+        // Group results by quiz_id
+        const map: { [quizId: string]: any[] } = {};
+        data.forEach((result: any) => {
+          if (!map[result.quiz_id]) map[result.quiz_id] = [];
+          map[result.quiz_id].push(result);
+        });
+        setResultsMap(map);
+      }
+    };
+    fetchResults();
+  }, []);
+
   const getQuizResults = (quizId: string) => {
-    const allResults = JSON.parse(localStorage.getItem('quizResults') || '[]');
-    return allResults.filter((result: any) => result.quizId === quizId);
+    return resultsMap[quizId] || [];
   };
 
   return (
