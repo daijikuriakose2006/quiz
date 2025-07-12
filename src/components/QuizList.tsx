@@ -1,5 +1,6 @@
 
-import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,12 +25,12 @@ export const QuizList = ({ onTakeQuiz, onViewResults }: QuizListProps) => {
   const [selectedQuizForQR, setSelectedQuizForQR] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedQuizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
-    const parsedQuizzes = savedQuizzes.map((quiz: any) => ({
-      ...quiz,
-      createdAt: new Date(quiz.createdAt)
-    }));
-    setQuizzes(parsedQuizzes);
+    const fetchQuizzes = async () => {
+      const { data, error } = await supabase.from("quizzes").select("*");
+      if (data) setQuizzes(data);
+      // Optionally handle error
+    };
+    fetchQuizzes();
   }, []);
 
   const getQuizResults = (quizId: string) => {
