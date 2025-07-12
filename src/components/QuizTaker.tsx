@@ -99,7 +99,7 @@ export const QuizTaker = ({ quizId, onComplete }: QuizTakerProps) => {
     }
   };
 
-  const submitQuiz = () => {
+  const submitQuiz = async () => {
     if (!quiz) return;
 
     // Calculate score
@@ -110,20 +110,28 @@ export const QuizTaker = ({ quizId, onComplete }: QuizTakerProps) => {
       }
     });
 
-    // Save result
+    // Prepare result object
     const result = {
       id: Date.now().toString(),
-      quizId,
-      userName: userName.trim(),
+      quiz_id: quiz.id,
+      user_name: userName.trim(),
       score,
-      totalQuestions: quiz.questions.length,
-      timeElapsed,
-      submittedAt: new Date(),
-      answers
+      total_questions: quiz.questions.length,
+      time_elapsed: timeElapsed,
+      submitted_at: new Date().toISOString(),
+      answers,
     };
 
-    const existingResults = JSON.parse(localStorage.getItem('quizResults') || '[]');
-    localStorage.setItem('quizResults', JSON.stringify([...existingResults, result]));
+    // Save to Supabase
+    const { error } = await supabase.from("quiz_results").insert([result]);
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save result to Supabase",
+        variant: "destructive"
+      });
+      return;
+    }
 
     toast({
       title: "Quiz Submitted!",
