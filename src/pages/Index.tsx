@@ -2,7 +2,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, QrCode, Trophy, Users } from "lucide-react";
+import { PlusCircle, QrCode, Trophy, Users, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import { QuizCreator } from "@/components/QuizCreator";
 import { QuizTaker } from "@/components/QuizTaker";
 import { QuizResults } from "@/components/QuizResults";
@@ -11,6 +12,7 @@ import { QuizList } from "@/components/QuizList";
 const Index = () => {
   const [currentView, setCurrentView] = useState<'home' | 'create' | 'take' | 'results' | 'list'>('home');
   const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
+  const { user, signOut } = useAuth();
 
   const handleTakeQuiz = (quizId: string) => {
     setSelectedQuizId(quizId);
@@ -101,13 +103,27 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-100">
       <div className="container mx-auto px-4 py-16">
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            Quiz Master
-          </h1>
-          <p className="text-xl text-gray-600 mb-8">
-            Create engaging quizzes, share with QR codes, and track results in real-time
-          </p>
+        <div className="flex justify-between items-center mb-8">
+          <div className="text-center flex-1">
+            <h1 className="text-5xl font-bold text-gray-900 mb-4">
+              Quiz Master
+            </h1>
+            <p className="text-xl text-gray-600 mb-8">
+              Create engaging quizzes, share with QR codes, and track results in real-time
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-600">Welcome, {user?.email}</span>
+            <Button 
+              onClick={signOut} 
+              variant="outline" 
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign Out
+            </Button>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
