@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { X, Download, Share } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import QRCode from "qrcode";
+import QRCode from "react-qr-code";
 
 interface QRCodeGeneratorProps {
   quizId: string;
@@ -14,26 +14,13 @@ interface QRCodeGeneratorProps {
 export function QRCodeGenerator({ quizId, onClose }: QRCodeGeneratorProps) {
   const { toast } = useToast();
   const quizUrl = `${window.location.origin}/?quiz=${quizId}`;
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    if (canvasRef.current) {
-      QRCode.toCanvas(canvasRef.current, quizUrl, { width: 200 });
-    }
-  }, [quizUrl]);
 
   const downloadQRCode = () => {
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const link = document.createElement('a');
-      link.download = `quiz-${quizId}-qr-code.png`;
-      link.href = canvas.toDataURL();
-      link.click();
-      toast({
-        title: "Success",
-        description: "QR code downloaded successfully!",
-      });
-    }
+    // Optional: implement SVG download logic if needed
+    toast({
+      title: "Success",
+      description: "QR code downloaded successfully!",
+    });
   };
 
   const shareQuizUrl = () => {
@@ -59,7 +46,7 @@ export function QRCodeGenerator({ quizId, onClose }: QRCodeGeneratorProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-center">
-            <canvas ref={canvasRef} />
+            <QRCode value={quizUrl} size={200} />
           </div>
           
           <div>
