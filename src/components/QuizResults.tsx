@@ -1,5 +1,7 @@
 
-import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Clock, User, Award, Medal, Target } from "lucide-react";
@@ -27,30 +29,32 @@ interface QuizResultsProps {
   quizId: string;
 }
 
-export const QuizResults = ({ quizId }: QuizResultsProps) => {
-  const [quiz, setQuiz] = useState<Quiz | null>(null);
-  const [results, setResults] = useState<QuizResult[]>([]);
+export const QuizResults = () => {
+  const { quizId } = useParams();
+  const [quiz, setQuiz] = useState(null);
+  const [results, setResults] = useState([]);
 
   useEffect(() => {
-    // Load quiz and results
-    const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
-    const foundQuiz = quizzes.find((q: Quiz) => q.id === quizId);
-    setQuiz(foundQuiz);
+    const fetchQuiz = async () => {
+      const { data } = await supabase
+        .from("quizzes")
+        .select("*")
+        .eq("id", quizId)
+        .single();
+      setQuiz(data);
+    };
+    fetchQuiz();
+  }, [quizId]);
 
-    const allResults = JSON.parse(localStorage.getItem('quizResults') || '[]');
-    const quizResults = allResults
-      .filter((result: QuizResult) => result.quizId === quizId)
-      .map((result: QuizResult) => ({
-        ...result,
-        submittedAt: new Date(result.submittedAt)
-      }))
-      .sort((a: QuizResult, b: QuizResult) => {
-        // Sort by score (descending), then by time (ascending)
-        if (b.score !== a.score) return b.score - a.score;
-        return a.timeElapsed - b.timeElapsed;
-      });
-
-    setResults(quizResults);
+  useEffect(() => {
+    const fetchResults = async () => {
+      const { data } = await supabase
+        .from("quiz_results")
+        .select("*")
+        .eq("quiz_id", quizId);
+      setResults(data || []);
+    };
+    fetchResults();
   }, [quizId]);
 
   const formatTime = (seconds: number) => {
@@ -78,11 +82,14 @@ export const QuizResults = ({ quizId }: QuizResultsProps) => {
 
   if (!quiz) {
     return (
-      <Card className="max-w-4xl mx-auto">
-        <CardContent className="text-center py-8">
-          <p>Quiz not found.</p>
-        </CardContent>
-      </Card>
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold mb-4">Quiz not found.</h1>
+          <a href="/" className="text-blue-500 hover:text-blue-700 underline">
+            Return to Home
+          </a>
+        </div>
+      </div>
     );
   }
 
