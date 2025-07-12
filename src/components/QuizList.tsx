@@ -28,16 +28,17 @@ export const QuizList = ({ onTakeQuiz, onViewResults }: QuizListProps) => {
     const fetchQuizzes = async () => {
       const { data, error } = await supabase.from("quizzes").select("*");
       if (data) {
-        // Map Supabase fields to your Quiz interface
-        setQuizzes(
-          data.map((quiz: any) => ({
-            ...quiz,
-            createdAt: quiz.created_at ? new Date(quiz.created_at) : new Date(),
-            questions: Array.isArray(quiz.questions) ? quiz.questions : [],
-          }))
-        );
+        const mapped = data.map((quiz: any) => ({
+          ...quiz,
+          createdAt: quiz.created_at ? new Date(quiz.created_at) : new Date(),
+          questions: Array.isArray(quiz.questions) ? quiz.questions : [],
+        }));
+        console.log("Fetched quizzes from Supabase:", mapped); // <--- Add this line
+        setQuizzes(mapped);
       }
-      // Optionally handle error
+      if (error) {
+        console.error("Supabase fetch error:", error);
+      }
     };
     fetchQuizzes();
   }, []);

@@ -46,8 +46,12 @@ export const QuizTaker = ({ quizId, onComplete }: QuizTakerProps) => {
         .eq("id", quizId)
         .single();
       if (data) {
-        setQuiz(data);
-        setAnswers(new Array(data.questions.length).fill(-1));
+        setQuiz({
+          ...data,
+          createdAt: data.created_at ? new Date(data.created_at) : new Date(),
+          questions: Array.isArray(data.questions) ? data.questions : [],
+        });
+        setAnswers(new Array((Array.isArray(data.questions) ? data.questions.length : 0)).fill(-1));
       } else {
         setQuiz(null);
       }
