@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Clock, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Question {
   id: string;
@@ -38,13 +39,20 @@ export const QuizTaker = ({ quizId, onComplete }: QuizTakerProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Load quiz from localStorage
-    const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
-    const foundQuiz = quizzes.find((q: Quiz) => q.id === quizId);
-    if (foundQuiz) {
-      setQuiz(foundQuiz);
-      setAnswers(new Array(foundQuiz.questions.length).fill(-1));
-    }
+    const fetchQuiz = async () => {
+      const { data, error } = await supabase
+        .from("quizzes")
+        .select("*")
+        .eq("id", quizId)
+        .single();
+      if (data) {
+        setQuiz(data);
+        setAnswers(new Array(data.questions.length).fill(-1));
+      } else {
+        setQuiz(null);
+      }
+    };
+    fetchQuiz();
   }, [quizId]);
 
   useEffect(() => {

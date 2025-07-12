@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Trash2, Plus, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Question {
   id: string;
@@ -61,7 +62,7 @@ export const QuizCreator = ({ onComplete }: QuizCreatorProps) => {
     setQuestions(questions.filter(q => q.id !== id));
   };
 
-  const saveQuiz = () => {
+  const saveQuiz = async () => {
     if (!title.trim()) {
       toast({
         title: "Error",
@@ -100,17 +101,24 @@ export const QuizCreator = ({ onComplete }: QuizCreatorProps) => {
       }
     }
 
-    const quiz: Quiz = {
+    const quiz = {
       id: Date.now().toString(),
       title: title.trim(),
       description: description.trim(),
       questions,
-      createdAt: new Date()
+      created_at: new Date().toISOString(),
     };
 
-    // Save to localStorage (in a real app, this would be saved to a database)
-    const existingQuizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
-    localStorage.setItem('quizzes', JSON.stringify([...existingQuizzes, quiz]));
+    // Save to Supabase
+    const { error } = await supabase.from("quizzes").insert([quiz]);
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save quiz to Supabase",
+        variant: "destructive"
+      });
+      return;
+    }
 
     toast({
       title: "Success",
